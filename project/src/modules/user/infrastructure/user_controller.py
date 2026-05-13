@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.shared.database.connection import get_db
 from src.modules.user.application.user_service import UserService
+from sqlalchemy.exc import IntegrityError
 
 router = APIRouter()
 
@@ -10,12 +11,22 @@ router = APIRouter()
 @router.post("/users")
 def create_user(data: dict, db: Session = Depends(get_db)):
 
-    user = UserService.create_user(
-        db,
-        data["username"],
-        data["email"],
-        data["password"]
-    )
+    try:
+        user = UserService.create_user(
+            db,
+            data["username"],
+            data["email"],
+            data["password"]
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except IntegrityError as e:
+        db.rollback()
+        if "username" in str(e.orig):
+            raise HTTPException(status_code=400, detail="El usuario ya existe")
+        if "email" in str(e.orig):
+            raise HTTPException(status_code=400, detail="El correo ya está registrado")
+        raise HTTPException(status_code=400, detail="Datos duplicados")
 
     return {
         "message": "usuario creado",

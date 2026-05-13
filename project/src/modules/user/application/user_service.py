@@ -47,9 +47,7 @@ class UserService:
         if not user:
             return False
 
-        if not verify_password(
-    password,
-    user.password
-        ):
-         return False
-         return True
+        if not verify_password(password,user.password):
+            return False
+
+        return True
