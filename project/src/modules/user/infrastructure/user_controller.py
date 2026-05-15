@@ -97,8 +97,8 @@ def login(data: dict, db: Session = Depends(get_db)):
 
     if not response:
         raise HTTPException(
-            status_code=204,
-            detail="credenciales incorrectas"
+            status_code=401,
+            detail="Usuario o contraseña incorrectos"
         )
 
     return response

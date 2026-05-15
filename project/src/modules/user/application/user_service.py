@@ -74,6 +74,7 @@ class UserService:
 
         return {
             "message": "sesion iniciada",
+            "id del usuario": user.id,
             "token": generated_token,
             "expires_at": colombia_time.strftime("%d-%m-%Y %H:%M")
         }
