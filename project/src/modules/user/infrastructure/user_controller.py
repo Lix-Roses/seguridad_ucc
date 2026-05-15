@@ -89,18 +89,16 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 @router.post("/login")
 def login(data: dict, db: Session = Depends(get_db)):
 
-    success = UserService.login(
+    response = UserService.login(
         db,
         data["username"],
         data["password"]
     )
 
-    if not success:
+    if not response:
         raise HTTPException(
             status_code=204,
             detail="credenciales incorrectas"
         )
 
-    return {
-        "message": "sesion iniciada"
-    }
+    return response

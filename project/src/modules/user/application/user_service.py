@@ -4,8 +4,14 @@ from src.shared.security.security import (
     validate_password
 )
 from src.modules.user.infrastructure.user_repository import UserRepository
-from src.modules.user.domain.user_entity import User
+from src.modules.user.infrastructure.token_repository import TokenRepository
 
+from src.modules.user.domain.user_entity import User
+from src.modules.user.domain.token_entity import Token
+
+import secrets
+
+from datetime import datetime, timedelta, timezone
 
 class UserService:
 
@@ -47,7 +53,27 @@ class UserService:
         if not user:
             return False
 
-        if not verify_password(password,user.password):
+        # VERIFICAR HASH
+        if not verify_password(password, user.password):
             return False
 
-        return True
+        generated_token = secrets.token_hex(32)
+
+        # EXPIRACION 15 MINUTOS
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+
+        token_data = Token(
+            token=generated_token,
+            user_id=user.id,
+            expires_at=expires_at
+        )
+
+        TokenRepository.create(db, token_data)
+
+        colombia_time = expires_at.astimezone()
+
+        return {
+            "message": "sesion iniciada",
+            "token": generated_token,
+            "expires_at": colombia_time.strftime("%d-%m-%Y %H:%M")
+        }
