@@ -15,3 +15,8 @@ class TokenRepository:
         db.refresh(token_data)
 
         return token_data
+
+    #Metodo para buscar el token en la base de datos
+    @staticmethod
+    def get_by_token(db: Session, token: str):
+        return db.query(Token).filter(Token.token == token).first()

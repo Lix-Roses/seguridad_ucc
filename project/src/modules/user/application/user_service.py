@@ -1,3 +1,7 @@
+from _apple_support import SystemLog
+
+from src.modules.logs.domain.log_entity import SystemLog
+from src.modules.logs.infrastructure.log_repository import LogRepository
 from src.shared.security.security import (
     hash_password,
     verify_password,
@@ -55,23 +59,34 @@ class UserService:
 
         # VERIFICAR HASH
         if not verify_password(password, user.password):
+            log = SystemLog(
+                event="LOGIN_FAILED",
+                description=f"Contraseña incorrecta para: {username}",
+                status="FAILED",
+                user_id=user.id
+            )
+            LogRepository.create(db, log)
             return False
 
         generated_token = secrets.token_hex(32)
-
-        # EXPIRACION 15 MINUTOS
-        expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
-
+        # EXPIRACIÓN 15 MINUTOS
+        expires_at = datetime.utcnow() + timedelta(minutes=15)
         token_data = Token(
             token=generated_token,
             user_id=user.id,
-            expires_at=expires_at
+            expires_at=expires_at,
         )
-
         TokenRepository.create(db, token_data)
 
-        colombia_time = expires_at.astimezone()
+        log = SystemLog(
+            event="LOGIN_SUCCESS",
+            description=f"Inicio de sesión exitoso: {username}",
+            status="SUCCESS",
+            user_id = user.id
+        )
+        LogRepository.create(db, log)
 
+        colombia_time = expires_at.astimezone()
         return {
             "message": "sesion iniciada",
             "id del usuario": user.id,

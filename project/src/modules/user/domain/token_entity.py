@@ -9,6 +9,7 @@ class Token(Base):
 
     token = Column(String(255), nullable=False)
 
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+
 
     expires_at = Column(DateTime, nullable=False)

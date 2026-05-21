@@ -4,7 +4,8 @@ from src.modules.user.infrastructure.user_controller import router as user_route
 from src.shared.database.connection import engine
 from src.modules.user.domain.user_entity import Base
 
-Base.metadata.create_all(bind=engine)
+from src.modules.logs.domain.log_entity import Base as LogBase
+LogBase.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

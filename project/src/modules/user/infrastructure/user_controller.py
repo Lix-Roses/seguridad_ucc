@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.shared.database.connection import get_db
 from src.modules.user.application.user_service import UserService
+from src.modules.user.infrastructure.token_validator import verify_token
 from sqlalchemy.exc import IntegrityError
 
 router = APIRouter()
@@ -59,30 +60,25 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
 # ACTUALIZAR USUARIO
 @router.put("/users/{user_id}")
-def update_user(user_id: int, data: dict, db: Session = Depends(get_db)):
+def update_user(user_id: int, data: dict, db: Session = Depends(get_db), token=Depends(verify_token)):
+    if token.user_id != user_id:
+        raise HTTPException(status_code=403, detail="No tienes permiso para modificar este usuario")
 
     user = UserService.update_user(db, user_id, data)
-
     if not user:
         raise HTTPException(status_code=404, detail="usuario no encontrado")
-
-    return {
-        "message": "usuario actualizado"
-    }
-
+    return {"message": "usuario actualizado"}
 
 # ELIMINAR USUARIO
 @router.delete("/users/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(user_id: int, data: dict, db: Session = Depends(get_db), token=Depends(verify_token)):
+    if token.user_id != user_id:
+        raise HTTPException(status_code=403, detail="No tienes permiso para eliminar este usuario")
 
     user = UserService.delete_user(db, user_id)
-
     if not user:
         raise HTTPException(status_code=404, detail="usuario no encontrado")
-
-    return {
-        "message": "usuario eliminado"
-    }
+    return {"message": "usuario eliminado"}
 
 
 # LOGIN
