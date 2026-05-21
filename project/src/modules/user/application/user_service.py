@@ -3,9 +3,13 @@ from src.shared.security.security import (
     verify_password,
     validate_password
 )
-
 from src.modules.user.infrastructure.user_repository import UserRepository
+from src.modules.user.infrastructure.token_repository import TokenRepository
+
 from src.modules.user.domain.user_entity import User
+from src.modules.user.domain.token_entity import Token
+
+import secrets
 
 from src.modules.logs.domain.log_entity import SystemLog
 from src.modules.logs.infrastructure.log_repository import LogRepository
@@ -61,24 +65,28 @@ class UserService:
 
             return False
 
+        # VERIFICAR HASH
         if not verify_password(password, user.password):
-
-            log = SystemLog(
-                event="LOGIN_FAILED",
-                description=f"Contraseña incorrecta para: {username}",
-                status="FAILED"
-            )
-
-            LogRepository.create(db, log)
-
             return False
 
-        log = SystemLog(
-            event="LOGIN_SUCCESS",
-            description=f"Inicio de sesión exitoso: {username}",
-            status="SUCCESS"
+        generated_token = secrets.token_hex(32)
+
+        # EXPIRACION 15 MINUTOS
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+
+        token_data = Token(
+            token=generated_token,
+            user_id=user.id,
+            expires_at=expires_at
         )
 
-        LogRepository.create(db, log)
+        TokenRepository.create(db, token_data)
 
-        return True
+        colombia_time = expires_at.astimezone()
+
+        return {
+            "message": "sesion iniciada",
+            "id del usuario": user.id,
+            "token": generated_token,
+            "expires_at": colombia_time.strftime("%d-%m-%Y %H:%M")
+        }
