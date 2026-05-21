@@ -53,7 +53,8 @@ class UserService:
 
             log = SystemLog(
                 event="LOGIN_FAILED",
-                description=f"Usuario no encontrado: {username}"
+                description=f"Usuario no encontrado: {username}",
+                status="FAILED"
             )
 
             LogRepository.create(db, log)
@@ -64,7 +65,8 @@ class UserService:
 
             log = SystemLog(
                 event="LOGIN_FAILED",
-                description=f"Contraseña incorrecta para: {username}"
+                description=f"Contraseña incorrecta para: {username}",
+                status="FAILED"
             )
 
             LogRepository.create(db, log)
@@ -73,7 +75,8 @@ class UserService:
 
         log = SystemLog(
             event="LOGIN_SUCCESS",
-            description=f"Inicio de sesión exitoso: {username}"
+            description=f"Inicio de sesión exitoso: {username}",
+            status="SUCCESS"
         )
 
         LogRepository.create(db, log)
