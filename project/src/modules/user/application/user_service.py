@@ -1,7 +1,5 @@
-from _apple_support import SystemLog
+from datetime import timedelta, datetime
 
-from src.modules.logs.domain.log_entity import SystemLog
-from src.modules.logs.infrastructure.log_repository import LogRepository
 from src.shared.security.security import (
     hash_password,
     verify_password,

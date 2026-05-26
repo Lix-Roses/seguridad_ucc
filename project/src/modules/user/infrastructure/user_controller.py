@@ -71,7 +71,7 @@ def update_user(user_id: int, data: dict, db: Session = Depends(get_db), token=D
 
 # ELIMINAR USUARIO
 @router.delete("/users/{user_id}")
-def delete_user(user_id: int, data: dict, db: Session = Depends(get_db), token=Depends(verify_token)):
+def delete_user(user_id: int, db: Session = Depends(get_db), token=Depends(verify_token)):
     if token.user_id != user_id:
         raise HTTPException(status_code=403, detail="No tienes permiso para eliminar este usuario")
 
