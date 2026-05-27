@@ -12,3 +12,10 @@ LogBase.metadata.create_all(bind=engine)
 app = FastAPI()
 
 app.include_router(user_router)
+@aplicación.get("/health")
+def health_check():
+    return {
+        "status": "ok",
+        "message": "Sistema funcionando correctamente"
+    }
+  Agregar endpoint health check
